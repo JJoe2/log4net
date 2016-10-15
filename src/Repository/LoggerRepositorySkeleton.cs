@@ -40,7 +40,7 @@ namespace log4net.Repository
 	/// </remarks>
 	/// <author>Nicko Cadell</author>
 	/// <author>Gert Driesen</author>
-	public abstract class LoggerRepositorySkeleton : ILoggerRepository
+	public abstract class LoggerRepositorySkeleton : ILoggerRepository, Appender.IFlushable
 	{
 		#region Member Variables
 
@@ -573,5 +573,50 @@ namespace log4net.Repository
 		{
 			OnConfigurationChanged(e);
 		}
+
+        /// <summary>
+        /// Flushes all configured Appenders that implement <see cref="log4net.Appender.IFlushable"/>.
+        /// </summary>
+        /// <param name="millisecondsTimeout">The maximum time to wait for logging events to be flushed.</param>
+        /// <returns><c>True</c> if all logging events were flushed successfully, else <c>false</c>.</returns>
+        public bool Flush(int millisecondsTimeout)
+        {
+            // Assume success until one of the appenders fails
+            bool result = true;
+
+            DateTime startTimeUtc = DateTime.UtcNow;
+
+            // Do buffering appenders first.  These may be forwarding to other appenders
+            foreach(var appender in GetAppenders())
+            {
+                log4net.Appender.IFlushable flushable = appender as log4net.Appender.IFlushable;
+                if (flushable == null) continue;
+                if (appender is Appender.BufferingAppenderSkeleton)
+                {
+                    int elapsedMilliseconds = (int) (DateTime.UtcNow - startTimeUtc).TotalMilliseconds;
+                    int timeout = millisecondsTimeout - elapsedMilliseconds;
+                    if (timeout < 0) return false;
+
+                    if (!flushable.Flush(timeout)) result = false;
+                }
+            }
+
+            // Do non-buffering appenders.
+            foreach (var appender in GetAppenders())
+            {
+                log4net.Appender.IFlushable flushable = appender as log4net.Appender.IFlushable;
+                if (flushable == null) continue;
+                if (!(appender is Appender.BufferingAppenderSkeleton))
+                {
+                    int elapsedMilliseconds = (int)(DateTime.UtcNow - startTimeUtc).TotalMilliseconds;
+                    int timeout = millisecondsTimeout - elapsedMilliseconds;
+                    if (timeout < 0) return false;
+
+                    if (!flushable.Flush(timeout)) result = false;
+                }
+            }
+
+            return result;
+        }
 	}
 }

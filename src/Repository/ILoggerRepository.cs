@@ -345,5 +345,5 @@ namespace log4net.Repository
 		/// </para>
 		/// </remarks>
 		log4net.Appender.IAppender[] GetAppenders();
-	}
+    }
 }

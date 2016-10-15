@@ -40,7 +40,7 @@ namespace log4net.Appender
 	/// </para>
 	/// </remarks>
 	/// <author>Nicko Cadell</author>
-	public class DebugAppender : AppenderSkeleton
+	public class DebugAppender : AppenderSkeleton, IFlushable
 	{
 		#region Public Instance Constructors
 
@@ -145,6 +145,23 @@ namespace log4net.Appender
 		{
 			get { return true; }
 		}
+
+
+        /// <summary>
+        /// Flushes any buffered log data.
+        /// </summary>
+		/// <param name="millisecondsTimeout">The maximum time to wait for logging events to be flushed.</param>
+		/// <returns><c>True</c> if all logging events were flushed successfully, else <c>false</c>.</returns>
+		public bool Flush(int millisecondsTimeout)
+        {
+            // Nothing to do if ImmediateFlush is true
+			if (m_immediateFlush) return true;
+
+            // System.Diagnostics.Debug is thread-safe, so no need for lock(this).
+			System.Diagnostics.Debug.Flush();
+
+			return true;
+        }
 
 		#endregion Override implementation of AppenderSkeleton
 
