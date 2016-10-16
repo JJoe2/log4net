@@ -166,12 +166,9 @@
     <Compile Include="Appender\IBulkAppender.cs">
       <SubType>Code</SubType>
     </Compile>
-<<<<<<< HEAD
-=======
     <Compile Include="Appender\IFlushable.cs">
       <SubType>Code</SubType>
     </Compile>
->>>>>>> a44a4cb... Added new file IFlushable.cs to VS2008 and VS2010 projects
     <Compile Include="Appender\LocalSyslogAppender.cs">
       <SubType>Code</SubType>
     </Compile>
