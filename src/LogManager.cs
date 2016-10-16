@@ -754,9 +754,10 @@ namespace log4net
 		#endregion Domain & Repository Manager Methods
 
         /// <summary>
-        /// Flushes logging events buffered in all configured appenders in the default repository
+        /// Flushes logging events buffered in all configured appenders in the default repository.
         /// </summary>
-        /// <param name="millisecondsTimeout">The maximum time to wait for logging events to be flushed.</param>
+        /// <param name="millisecondsTimeout">The maximum time in milliseconds to wait for logging events from asycnhronous appenders to be flushed,
+        /// or <see cref="Timeout.Infinite"/> to wait indefinitely.</param>
         /// <returns><c>True</c> if all logging events were flushed successfully, else <c>false</c>.</returns>
         public static bool Flush(int millisecondsTimeout)
         {
