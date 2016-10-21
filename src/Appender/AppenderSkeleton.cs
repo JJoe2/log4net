@@ -296,6 +296,7 @@ namespace log4net.Appender
 
 			lock(this)
 			{
+
 				if (m_closed)
 				{
 					ErrorHandler.Error("Attempted to append to closed appender named ["+m_name+"].");
@@ -307,6 +308,12 @@ namespace log4net.Appender
 				{
 					return;
 				}
+
+				// Discard events from our internal logger.
+				// An asynchronous appender that uses its internal logger may generate logging events on
+				// a different thread.  m_recursiveGuard won't protect against this.
+				if (loggingEvent.LoggerName.Equals(InternalLoggerName)) return;
+
 
 				try
 				{
@@ -783,16 +790,17 @@ namespace log4net.Appender
 		#endregion
 
 		/// <summary>
-        	/// Flushes any buffered log data.
-        	/// </summary>
+		/// Flushes any buffered log data.
+		/// </summary>
 		/// <remarks>
 		/// This implementation doesn't flush anything and always returns true
 		/// </remarks>
-        	/// <returns><c>True</c> if all logging events were flushed successfully, else <c>false</c>.</returns>
-        	public virtual bool Flush(int millisecondsTimeout)
-        	{
-		    return true;
-        	}
+		/// <returns><c>True</c> if all logging events were flushed successfully, else <c>false</c>.</returns>
+		public virtual bool Flush(int millisecondsTimeout)
+		{
+			return true;
+		}
+
 
 		#region Private Instance Fields
 
@@ -905,5 +913,115 @@ namespace log4net.Appender
 	    private readonly static Type declaringType = typeof(AppenderSkeleton);
 
 	    #endregion Private Static Fields
+
+		#region Logger to be used internally by this appender
+
+		/// <summary>
+		/// Gets the name of the logger that can be used internally by this appender.
+		/// </summary>
+		protected string InternalLoggerName
+		{
+			get
+			{
+				if (_internalLoggerName == null)
+				{
+					_internalLoggerName = this.GetType().FullName;
+
+				}
+				return _internalLoggerName;
+			}
+
+		}
+		private string _internalLoggerName;
+
+		/// <summary>
+		/// Gets an <see cref="ILog"/> instance that can be used internally by this appender.
+		/// </summary>
+		/// <remarks>
+		/// This logger can only be used after log4et initialization is complete.
+		/// </remarks>
+        /// <exception cref="InvalidOperationException">Thrown if this property is accessed before log4net has been configured.</exception>
+		protected ILog InternalLogger
+		{
+			get
+			{
+				if (_internalLogger == null)
+				{
+					if (!LogManager.GetRepository().Configured)
+					{
+						throw new InvalidOperationException("The appender's internal logger cannot be used until log4net has been configured.");
+					}
+					_internalLogger = EnableInternalLogging ? LogManager.GetLogger(InternalLoggerName) : new NullLogger();
+				}
+				return _internalLogger;
+			}
+		}
+		private ILog _internalLogger;
+
+        /// <summary>
+        /// Gets or sets a value that indicates whether this Appender logs to log4net using an internal <see cref="ILog"/> instance.
+        /// </summary>
+        /// <remarks>
+        /// By default internal logging is enabled if log4net internal logging is enabled (LogLog.InternalDebugging is true).
+        /// </remarks>
+        public bool EnableInternalLogging
+        {
+            get { return _enableInternalLogging; }
+            set { _enableInternalLogging = value; }
+        }
+        private bool _enableInternalLogging = LogLog.InternalDebugging;
+
+        private class NullLogger : ILog
+        {
+            public void Debug(object message) { }
+            public void Debug(object message, Exception exception) { }
+            public void DebugFormat(string format, params object[] args) { }
+            public void DebugFormat(string format, object arg0) { }
+            public void DebugFormat(string format, object arg0, object arg1) { }
+            public void DebugFormat(string format, object arg0, object arg1, object arg2) { }
+            public void DebugFormat(IFormatProvider provider, string format, params object[] args) { }
+ 
+            public void Info(object message) { }
+            public void Info(object message, Exception exception) { }
+            public void InfoFormat(string format, params object[] args) { }
+            public void InfoFormat(string format, object arg0) { }
+            public void InfoFormat(string format, object arg0, object arg1) { }
+            public void InfoFormat(string format, object arg0, object arg1, object arg2) { }
+            public void InfoFormat(IFormatProvider provider, string format, params object[] args) { }
+
+            public void Warn(object message) { }
+            public void Warn(object message, Exception exception) { }
+            public void WarnFormat(string format, params object[] args) { }
+            public void WarnFormat(string format, object arg0) { }
+            public void WarnFormat(string format, object arg0, object arg1) { }
+            public void WarnFormat(string format, object arg0, object arg1, object arg2) { }
+            public void WarnFormat(IFormatProvider provider, string format, params object[] args) { }
+
+            public void Error(object message) { }
+            public void Error(object message, Exception exception) { }
+            public void ErrorFormat(string format, params object[] args) { }
+            public void ErrorFormat(string format, object arg0) { }
+            public void ErrorFormat(string format, object arg0, object arg1) { }
+            public void ErrorFormat(string format, object arg0, object arg1, object arg2) { }
+            public void ErrorFormat(IFormatProvider provider, string format, params object[] args) { }
+
+            public void Fatal(object message) { }
+            public void Fatal(object message, Exception exception) { }
+            public void FatalFormat(string format, params object[] args) { }
+            public void FatalFormat(string format, object arg0) { }
+            public void FatalFormat(string format, object arg0, object arg1) { }
+            public void FatalFormat(string format, object arg0, object arg1, object arg2) { }
+            public void FatalFormat(IFormatProvider provider, string format, params object[] args) { }
+
+            public bool IsDebugEnabled { get { return false; } }
+            public bool IsInfoEnabled { get { return false; } }
+            public bool IsWarnEnabled { get { return false; } }
+            public bool IsErrorEnabled { get { return false; } }
+            public bool IsFatalEnabled { get { return false; } }
+
+            public ILogger Logger { get { throw new NotSupportedException(); } }
+        }
+		#endregion
+
 	}
 }
