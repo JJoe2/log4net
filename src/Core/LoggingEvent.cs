@@ -91,23 +91,12 @@ namespace log4net.Core
 		/// Gets or sets the local time the event was logged
 		/// </summary>
 		/// <remarks>
-		/// <para>
-		/// The TimeStamp is stored internally as UTC, and converted to the local time zone for this computer.
-		/// </para>
         /// <para>
         /// Prefer using the <see cref="TimeStampUtc"/> setter, since local time can be ambiguous.
 		/// </para>
 		/// </remarks>
-        public DateTime TimeStamp 
-        { 
-            get { return TimeStampUtc.ToLocalTime();  }
-            set 
-            {
-                LogLog.Warn(typeof(LoggingEvent), "Prefer setting TimeStampUtc, since local time can be ambiguous");
-                TimeStampUtc = value.ToUniversalTime(); 
-            }
-        }
-
+        [Obsolete("Prefer using TimeStampUtc, since local time can be ambiguous in time zones with daylight savings time.")]
+        public DateTime TimeStamp;
 
         /// <summary>
         /// Gets or sets the UTC time the event was logged
@@ -117,9 +106,31 @@ namespace log4net.Core
         /// The TimeStamp is stored in the UTC time zone.
         /// </para>
         /// </remarks>
-        public DateTime TimeStampUtc;
+#pragma warning disable 618 // Suppress warnings that TimeStamp field is obsolete
+        public DateTime TimeStampUtc
+        {
+            get
+            {
+                if (TimeStamp != default(DateTime) && 
+                    _timeStampUtc == default(DateTime))
+                {
+                    // TimeStamp field has been set explicitly but TimeStampUtc hasn't
+                    // => use TimeStamp
+                    return TimeStamp.ToUniversalTime();
+                }
+                return _timeStampUtc;
+            }
+            set
+            {
+                _timeStampUtc = value;
+                // For backwards compatibility
+                TimeStamp = _timeStampUtc.ToLocalTime();
+            }
+        }
+        private DateTime _timeStampUtc;
+#pragma warning restore 618
 
-		/// <summary>
+        /// <summary>
 		/// Location information for the caller.
 		/// </summary>
 		/// <remarks>
@@ -1097,8 +1108,10 @@ namespace log4net.Core
             // TODO: consider serializing UTC rather than local time.  Not implemented here because it
             // would give an unexpected result if client and server have different versions of this class.
             // info.AddValue("TimeStamp", m_data.TimeStampUtc);
+#pragma warning disable 618
 			info.AddValue("TimeStamp", m_data.TimeStamp);
-			info.AddValue("LocationInfo", m_data.LocationInfo);
+#pragma warning restore 618
+            info.AddValue("LocationInfo", m_data.LocationInfo);
 			info.AddValue("UserName", m_data.UserName);
 			info.AddValue("ExceptionString", m_data.ExceptionString);
 			info.AddValue("Properties", m_data.Properties);
