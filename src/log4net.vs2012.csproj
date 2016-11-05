@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <!--
 
  Licensed to the Apache Software Foundation (ASF) under one
@@ -127,6 +127,7 @@
     <Compile Include="Appender\AnsiColorTerminalAppender.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Appender\AppenderBase.cs" />
     <Compile Include="Appender\AppenderCollection.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -136,6 +137,8 @@
     <Compile Include="Appender\AspNetTraceAppender.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Appender\AsyncAppenderSkeleton.cs" />
+    <Compile Include="Appender\AsyncForwardingAppender.cs" />
     <Compile Include="Appender\BufferingAppenderSkeleton.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -151,6 +154,7 @@
     <Compile Include="Appender\DebugAppender.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Appender\DequeuedEventArgs.cs" />
     <Compile Include="Appender\EventLogAppender.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -163,6 +167,7 @@
     <Compile Include="Appender\IAppender.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Appender\IAppenderQueue.cs" />
     <Compile Include="Appender\IBulkAppender.cs">
       <SubType>Code</SubType>
     </Compile>
