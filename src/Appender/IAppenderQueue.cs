@@ -24,6 +24,11 @@ namespace log4net.Appender
         event EventHandler<DequeuedEventArgs> ItemsDequeued;
 
         /// <summary>
+        /// Fires when the queue has been flushed, to enable the appender to do its own flush.
+        /// </summary>
+        event EventHandler<FlushedEventArgs> Flushed;
+
+        /// <summary>
         /// Enqueues a formetted logging event.
         /// </summary>
         /// <param name="formattedLoggingEvent">The formatted logging event.</param>

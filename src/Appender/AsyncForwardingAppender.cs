@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace log4net.Appender
@@ -20,7 +21,7 @@ namespace log4net.Appender
 		#region Public Instance Constructors
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="ForwardingAppender" /> class.
+		/// Initializes a new instance of the <see cref="AsyncForwardingAppender" /> class.
 		/// </summary>
 		/// <remarks>
 		/// <para>
@@ -93,6 +94,48 @@ namespace log4net.Appender
             {
                 m_appenderAttachedImpl.AppendLoopOnAppenders(loggingEvents);
             }
+        }
+
+        private static int GetWaitTime(DateTime startTimeUtc, int millisecondsTimeout)
+        {
+            if (millisecondsTimeout == Timeout.Infinite) return Timeout.Infinite;
+            if (millisecondsTimeout == 0) return 0;
+
+            int elapsedMilliseconds = (int)(DateTime.UtcNow - startTimeUtc).TotalMilliseconds;
+            int timeout = millisecondsTimeout - elapsedMilliseconds;
+            if (timeout < 0) timeout = 0;
+            return timeout;
+        }
+
+        protected override bool Flush(int millisecondsTimeout)
+        {
+            // TODO: throw or just ignore invalid timeout?
+            //if (millisecondsTimeout < -1) throw new ArgumentOutOfRangeException("millisecondsTimeout", "Timeout must be -1 (Timeout.Infinite) or non-negative");
+            if (millisecondsTimeout < -1) return false;
+
+            // Assume success until one of the appenders fails
+            bool result = true;
+
+            // Use DateTime.UtcNow rather than a System.Diagnostics.Stopwatch for compatibility with .NET 1.x
+            DateTime startTimeUtc = DateTime.UtcNow;
+
+            // First tell all attached appenders to start (trigger) flushing, without waiting
+            if (millisecondsTimeout != 0) Flush(0);
+
+            // TODO: locking
+            if (m_appenderAttachedImpl != null)
+            {
+                foreach(IAppender appender in m_appenderAttachedImpl.Appenders)
+                {
+                    log4net.Appender.IFlushable flushable = appender as log4net.Appender.IFlushable;
+                    if (flushable == null) continue;
+                    int timeout = GetWaitTime(startTimeUtc, millisecondsTimeout);
+                    if (!flushable.Flush(timeout)) result = false;
+                }
+            }
+
+            return result;
+
         }
 
         #endregion Override implementation of AppenderSkeleton

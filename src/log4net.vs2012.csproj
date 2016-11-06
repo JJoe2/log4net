@@ -161,6 +161,7 @@
     <Compile Include="Appender\FileAppender.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Appender\FlushedEventArgs.cs" />
     <Compile Include="Appender\ForwardingAppender.cs">
       <SubType>Code</SubType>
     </Compile>

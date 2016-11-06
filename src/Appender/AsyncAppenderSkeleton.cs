@@ -147,6 +147,7 @@ namespace log4net.Appender
                     if (Queue == null) throw new InvalidOperationException("Appender is asynchronous but has no queue.");
                     Queue.ActivateOptions();
                     Queue.ItemsDequeued += Queue_ItemsDequeued;
+                    Queue.Flushed += Queue_Flushed;
                 }
                 // Configure derived class
                 this.ActivateOptions();
@@ -158,6 +159,16 @@ namespace log4net.Appender
                 string message = String.Format("ActivateOptions failed, appender {0} disabled.", Name);
                 ErrorHandler.Error(message, ex);
                 // this appender instance will ignore logging events because IsEnabled is false
+            }
+        }
+
+        void Queue_Flushed(object sender, FlushedEventArgs e)
+        {
+            if (e.FlushFailed) return;
+
+            if (!this.Flush(e.MillisecondsTimeout))
+            {
+                e.FlushFailed = true;
             }
         }
 
@@ -609,19 +620,28 @@ namespace log4net.Appender
 		#endregion
 
 		/// <summary>
-        /// Flushes any buffered log data.
+        /// In a derived class, flushes any buffered log data.
         /// </summary>
 		/// <remarks>
 		/// This implementation doesn't flush anything and always returns true
 		/// </remarks>
         /// <returns><c>True</c> if all logging events were flushed successfully, else <c>false</c>.</returns>
-        public override bool Flush(int millisecondsTimeout)
+        protected virtual bool Flush(int millisecondsTimeout)
         {
-            if (!IsAsynchronous) return true;
-            if (m_closed) return true;
-            if (!IsConfigured) return true;
+            return true;
+        }
 
-            return Queue.Flush(millisecondsTimeout);
+        bool IFlushable.Flush(int millisecondsTimeout)
+        {
+            if (!IsEnabled) return true;
+            if (IsAsynchronous)
+            {
+                return Queue.Flush(millisecondsTimeout);
+            }
+            else
+            {
+                return this.Flush(millisecondsTimeout);
+            }
         }
 
 		#region Private Instance Fields

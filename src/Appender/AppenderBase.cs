@@ -45,7 +45,7 @@ namespace log4net.Appender
 	/// </remarks>
 	/// <author>Nicko Cadell</author>
 	/// <author>Gert Driesen</author>
-	public abstract class AppenderBase : IFlushable
+	public abstract class AppenderBase
 	{
 		#region Protected Instance Constructors
 
@@ -505,18 +505,6 @@ namespace log4net.Appender
 		}
 
 		#endregion
-
-		/// <summary>
-		/// Flushes any buffered log data.
-		/// </summary>
-		/// <remarks>
-		/// This implementation doesn't flush anything and always returns true
-		/// </remarks>
-		/// <returns><c>True</c> if all logging events were flushed successfully, else <c>false</c>.</returns>
-		public virtual bool Flush(int millisecondsTimeout)
-		{
-			return true;
-		}
 
 		#region Private Instance Fields
 

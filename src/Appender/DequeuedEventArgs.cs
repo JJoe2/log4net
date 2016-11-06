@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace log4net.Appender
 {
     /// <summary>
-    /// Contains the formatted logging events that have been dequeued by an asynchronous appender
+    /// Provides data for the <see cref="IAppenderQueue.ItemsDequeued"/> event.
     /// </summary>
     public class DequeuedEventArgs : EventArgs
     {
