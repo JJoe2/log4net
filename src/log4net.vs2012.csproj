@@ -131,6 +131,7 @@
     <Compile Include="Appender\AppenderCollection.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Appender\AppenderQueueSkeleton.cs" />
     <Compile Include="Appender\AppenderSkeleton.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -154,6 +155,8 @@
     <Compile Include="Appender\DebugAppender.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Appender\DefaultAppenderQueue.cs" />
+    <Compile Include="Appender\DefaultAppendErrorHandler.cs" />
     <Compile Include="Appender\DequeuedEventArgs.cs" />
     <Compile Include="Appender\EventLogAppender.cs">
       <SubType>Code</SubType>
@@ -169,12 +172,15 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Appender\IAppenderQueue.cs" />
+    <Compile Include="Appender\IAppendErrorHandler.cs" />
     <Compile Include="Appender\IBulkAppender.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Appender\IFlushable.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Appender\IInternalLogger.cs" />
+    <Compile Include="Appender\InternalLogEventArgs.cs" />
     <Compile Include="Appender\LocalSyslogAppender.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -182,6 +188,7 @@
     <Compile Include="Appender\MemoryAppender.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Appender\MessagingAppenderQueue.cs" />
     <Compile Include="Appender\NetSendAppender.cs">
       <SubType>Code</SubType>
     </Compile>

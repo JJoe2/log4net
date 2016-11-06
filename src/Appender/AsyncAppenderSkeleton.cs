@@ -57,7 +57,7 @@ namespace log4net.Appender
 		protected AsyncAppenderSkeleton()
 		{
             Fix = FixFlags.Partial;
-            // TODO: Queue = ... default queue implementation
+            Queue = new DefaultAppenderQueue();
 		}
 
 		#endregion Protected Instance Constructors
@@ -148,6 +148,8 @@ namespace log4net.Appender
                     Queue.ActivateOptions();
                     Queue.ItemsDequeued += Queue_ItemsDequeued;
                     Queue.Flushed += Queue_Flushed;
+                    IInternalLogger internalLoggingQueue = Queue as IInternalLogger;
+                    if (internalLoggingQueue != null) internalLoggingQueue.Log += Queue_Log;
                 }
                 // Configure derived class
                 this.ActivateOptions();
@@ -159,6 +161,30 @@ namespace log4net.Appender
                 string message = String.Format("ActivateOptions failed, appender {0} disabled.", Name);
                 ErrorHandler.Error(message, ex);
                 // this appender instance will ignore logging events because IsEnabled is false
+            }
+        }
+
+        /// <summary>
+        /// Handles internal logging for the <see cref="Queue"/>
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="InternalLogEventArgs"/> instance containing the data to log.</param>
+        void Queue_Log(object sender, InternalLogEventArgs e)
+        {
+            if (e.Level >= Level.Error)
+            {
+                ErrorHandler.Error(e.Message, e.Exception);
+            }
+            else if (e.Level >= Level.Warn)
+            {
+                ErrorHandler.Error(e.Message, e.Exception);
+            }
+            else
+            {
+                if (!String.IsNullOrEmpty(e.Message))
+                {
+                    LogLog.Debug(declaringType, e.Message);
+                }
             }
         }
 

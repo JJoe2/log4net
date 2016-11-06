@@ -107,6 +107,16 @@ namespace log4net.Appender
             return timeout;
         }
 
+        /// <summary>
+        /// Flushes any buffered log data.
+        /// </summary>
+        /// <param name="millisecondsTimeout"></param>
+        /// <returns>
+        ///   <c>True</c> if all logging events were flushed successfully, else <c>false</c>.
+        /// </returns>
+        /// <remarks>
+        /// This implementation doesn't flush anything and always returns true
+        /// </remarks>
         protected override bool Flush(int millisecondsTimeout)
         {
             // TODO: throw or just ignore invalid timeout?
